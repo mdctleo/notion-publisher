@@ -79,18 +79,20 @@ class NotionClient(object):
         """
         input_value = url_or_id
         if url_or_id.startswith(BASE_URL):
-            url_or_id = (
-                url_or_id.split("#")[-1]
-                    .split("/")[-1]
-                    .split("&p=")[-1]
-                    .split("?")[0]
-                    .split("-")[-1]
-            )
             # url_or_id = (
-            #     url_or_id.split("/")[-1]
-            #     .split("#")[0]
+            #     url_or_id.split("#")[-1]
+            #         .split("/")[-1]
+            #         .split("&p=")[-1]
+            #         .split("?")[0]
+            #         .split("-")[-1]
             # )
-            print(str(uuid.UUID(url_or_id)))
+
+            url_or_id = (
+                url_or_id
+                .split("#")[0]
+                .split("/")[-1]
+                .split("-")[-1]
+            )
         try:
             # return url_or_id
             return str(uuid.UUID(url_or_id))
