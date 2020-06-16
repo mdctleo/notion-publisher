@@ -11,6 +11,8 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 BASE_URL = "https://www.notion.so/"
+API_BASE_URL = BASE_URL + "api/v3/"
+
 def create_session():
     """
     retry on 502
@@ -45,6 +47,7 @@ class NotionClient(object):
         # self.session.cookies = cookiejar_from_dict({"token_v2": token_v2})
         self.token_v2 = token_v2
         self.session = self.create_session()
+        print(self.session.cookies)
 
     def create_session(self):
         """
@@ -76,27 +79,47 @@ class NotionClient(object):
         """
         input_value = url_or_id
         if url_or_id.startswith(BASE_URL):
-            # url_or_id = (
-            #     url_or_id.split("#")[-1]
-            #         .split("/")[-1]
-            #         .split("&p=")[-1]
-            #         .split("?")[0]
-            #         .split("-")[-1]
-            # )
             url_or_id = (
-                url_or_id.split("/")[-1]
-                .split("#")[0]
+                url_or_id.split("#")[-1]
+                    .split("/")[-1]
+                    .split("&p=")[-1]
+                    .split("?")[0]
+                    .split("-")[-1]
             )
-            print(url_or_id)
+            # url_or_id = (
+            #     url_or_id.split("/")[-1]
+            #     .split("#")[0]
+            # )
+            print(str(uuid.UUID(url_or_id)))
         try:
-            return url_or_id
+            # return url_or_id
+            return str(uuid.UUID(url_or_id))
         except ValueError:
             raise InvalidNotionIdentifier(input_value)
 
     def get_page(self, url):
         test = self.extract_id(url)
-        response = self.session.get(BASE_URL + test)
+        data = {
+            "pageId": test,
+            "limit": 100000,
+            "cursor": {"stack": []},
+            "chunkNumber": 0,
+            "verticalColumns": False,
+        }
+        response = self.post("loadPageChunk", data)
         print(response.content)
+
+    def post(self, endpoint, data):
+        """
+        All API requests on Notion.so are done as POSTs (except the websocket communications).
+        """
+        url = urljoin(API_BASE_URL, endpoint)
+        response = self.session.post(url, json=data)
+        if response.status_code == 400:
+            print("400 error")
+
+        response.raise_for_status()
+        return response
 
 
 
