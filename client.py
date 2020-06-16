@@ -1,0 +1,102 @@
+"""
+Adapted from notion-py by @jamalex
+"""
+
+import uuid
+import requests
+from requests import Session, HTTPError
+from requests.cookies import cookiejar_from_dict
+from urllib.parse import urljoin
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
+BASE_URL = "https://www.notion.so/"
+def create_session():
+    """
+    retry on 502
+    """
+    session = Session()
+    retry = Retry(
+        status=5,
+        backoff_factor=0.3,
+        status_forcelist=(502,),
+        # CAUTION: adding 'POST' to this list which is not technically idempotent
+        method_whitelist=("POST", "HEAD", "TRACE", "GET", "PUT", "OPTIONS", "DELETE"),
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    return session
+
+
+# TODO: hmmm
+class InvalidNotionIdentifier(Exception):
+    pass
+
+
+class NotionClient(object):
+    """
+    This is the entry point to using the API. Create an instance of this class, passing it the value of the
+    "token_v2" cookie from a logged-in browser session on Notion.so. Most of the methods on here are primarily
+    for internal use -- the main one you'll likely want to use is `get_block`.
+    """
+
+    def __init__(self, token_v2):
+        # self.session = create_session()
+        # self.session.cookies = cookiejar_from_dict({"token_v2": token_v2})
+        self.token_v2 = token_v2
+        self.session = self.create_session()
+
+    def create_session(self):
+        """
+        retry on 502
+        """
+        session = Session()
+        retry = Retry(
+            status=5,
+            backoff_factor=0.3,
+            status_forcelist=(502,),
+            # CAUTION: adding 'POST' to this list which is not technically idempotent
+            method_whitelist=("POST", "HEAD", "TRACE", "GET", "PUT", "OPTIONS", "DELETE"),
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount("https://", adapter)
+        session.cookies = cookiejar_from_dict({"token_v2": self.token_v2})
+        return session
+
+
+    def get_token(self):
+        return self.token_v2
+
+    def extract_id(self, url_or_id):
+        """
+        Extract the block/page ID from a Notion.so URL -- if it's a bare page URL, it will be the
+        ID of the page. If there's a hash with a block ID in it (from clicking "Copy Link") on a
+        block in a page), it will instead be the ID of that block. If it's already in ID format,
+        it will be passed right through.
+        """
+        input_value = url_or_id
+        if url_or_id.startswith(BASE_URL):
+            # url_or_id = (
+            #     url_or_id.split("#")[-1]
+            #         .split("/")[-1]
+            #         .split("&p=")[-1]
+            #         .split("?")[0]
+            #         .split("-")[-1]
+            # )
+            url_or_id = (
+                url_or_id.split("/")[-1]
+                .split("#")[0]
+            )
+            print(url_or_id)
+        try:
+            return url_or_id
+        except ValueError:
+            raise InvalidNotionIdentifier(input_value)
+
+    def get_page(self, url):
+        test = self.extract_id(url)
+        response = self.session.get(BASE_URL + test)
+        print(response.content)
+
+
+
