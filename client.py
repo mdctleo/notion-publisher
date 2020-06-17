@@ -80,14 +80,6 @@ class NotionClient:
         """
         input_value = url_or_id
         if url_or_id.startswith(BASE_URL):
-            # url_or_id = (
-            #     url_or_id.split("#")[-1]
-            #         .split("/")[-1]
-            #         .split("&p=")[-1]
-            #         .split("?")[0]
-            #         .split("-")[-1]
-            # )
-
             url_or_id = (
                 url_or_id
                 .split("#")[0]
@@ -109,17 +101,13 @@ class NotionClient:
             "chunkNumber": 0,
             "verticalColumns": False,
         }
-        # response = self.post("loadPageChunk", data)
-        # print(response.content)
-        # syncRecordValues
-        # enqueTaks
         url = urljoin(API_BASE_URL, "loadUserContent")
         response = self.session.post(url, json=data)
 
         if response.status_code == 200:
             dummy_root = self.get_directory(response.json())
             # dummy_root.print_tree(dummy_root)
-            dummy_root.print_tree(dummy_root)
+            dummy_root.print_tree(dummy_root, "")
 
             return
         else:
@@ -136,7 +124,7 @@ class NotionClient:
         return dummy_root
 
     def get_sub_directory(self, block_id, block_json):
-        if block_id is None or block_json is None:
+        if block_json['value']['type'] != 'page':
             return
 
         parentBlock = Block()
@@ -174,23 +162,5 @@ class NotionClient:
         else:
             response.raise_for_status()
             raise BaseException("Failed to get block")
-
-
-    def export_htmls(self):
-        return None
-
-
-    def post(self, endpoint, data):
-        """
-        All API requests on Notion.so are done as POSTs (except the websocket communications).
-        """
-        url = urljoin(API_BASE_URL, endpoint)
-        response = self.session.post(url, json=data)
-        if response.status_code == 400:
-            print("400 error")
-
-        response.raise_for_status()
-        return response
-
 
 
