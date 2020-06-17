@@ -10,6 +10,8 @@ from urllib.parse import urljoin
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
+from parsing import Block
+
 BASE_URL = "https://www.notion.so/"
 API_BASE_URL = BASE_URL + "api/v3/"
 
@@ -35,7 +37,7 @@ class InvalidNotionIdentifier(Exception):
     pass
 
 
-class NotionClient(object):
+class NotionClient:
     """
     This is the entry point to using the API. Create an instance of this class, passing it the value of the
     "token_v2" cookie from a logged-in browser session on Notion.so. Most of the methods on here are primarily
@@ -47,7 +49,6 @@ class NotionClient(object):
         # self.session.cookies = cookiejar_from_dict({"token_v2": token_v2})
         self.token_v2 = token_v2
         self.session = self.create_session()
-        print(self.session.cookies)
 
     def create_session(self):
         """
@@ -108,8 +109,76 @@ class NotionClient(object):
             "chunkNumber": 0,
             "verticalColumns": False,
         }
-        response = self.post("loadPageChunk", data)
-        print(response.content)
+        # response = self.post("loadPageChunk", data)
+        # print(response.content)
+        # syncRecordValues
+        # enqueTaks
+        url = urljoin(API_BASE_URL, "loadUserContent")
+        response = self.session.post(url, json=data)
+
+        if response.status_code == 200:
+            dummy_root = self.get_directory(response.json())
+            # dummy_root.print_tree(dummy_root)
+            dummy_root.print_tree(dummy_root)
+
+            return
+        else:
+            response.raise_for_status()
+            raise BaseException("Failed to get initial page data")
+
+    def get_directory(self, response):
+        dummy_root = Block("dummy", "dummy", "dummy")
+
+        for block_id, block_json in response['recordMap']['block'].items():
+            block = self.get_sub_directory(block_id, block_json)
+            dummy_root.add_child(block)
+
+        return dummy_root
+
+    def get_sub_directory(self, block_id, block_json):
+        if block_id is None or block_json is None:
+            return
+
+        parentBlock = Block()
+        parentBlock.set_block_id(block_id)
+
+        if 'properties' in block_json['value'] and 'title' in block_json['value']['properties']:
+            parentBlock.set_title(block_json['value']['properties']['title'][0][0])
+
+        if 'format' in block_json['value'] and 'page_icon' in block_json['value']['format']:
+            parentBlock.set_icon(block_json['value']['format']['page_icon'])
+
+        if 'content' in block_json['value']:
+            for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap']['block'].items():
+                childBlock = self.get_sub_directory(block_id, block_json)
+                parentBlock.add_child(childBlock)
+
+        return parentBlock
+
+    def get_block(self, block_ids):
+        block_ids_formatted = {}
+        for block_id in block_ids:
+            block_ids_formatted[block_id] = block_ids_formatted.get(block_id, -1)
+
+        data = {
+            "recordVersionMap": {
+                "block": block_ids_formatted
+            }
+        }
+
+        url = urljoin(API_BASE_URL, "syncRecordValues")
+        response = self.session.post(url, json=data)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
+            raise BaseException("Failed to get block")
+
+
+    def export_htmls(self):
+        return None
+
 
     def post(self, endpoint, data):
         """
