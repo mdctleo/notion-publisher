@@ -5,3 +5,6 @@ loadUserContent-example.json
 syncRecordValues-example.json
 syncRecordValuesRequest-example.json
 test.json
+frontend/node_modules
+frontend/README.md
+test2.json

@@ -8,7 +8,7 @@ from client import NotionClient
 app = Flask(__name__)
 app.config.from_object('config')
 # TODO: remove cors
-CORS(app, origins="http://localhost:8080", supports_credentials=True)
+CORS(app, origins="http://localhost:3000", supports_credentials=True)
 
 @app.route('/')
 def hello_world():

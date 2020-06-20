@@ -23,8 +23,7 @@ class Block(object):
         if node is None:
             return
 
-        print(indent + node.title)
-        print(indent + node.icon)
+        print(indent + node.icon + " " + node.title)
 
         for child in node.children:
             self.print_tree(child, indent + "   ")
