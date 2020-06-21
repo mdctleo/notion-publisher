@@ -2,14 +2,13 @@ import React from 'react';
 import './App.css';
 import DirectoryInput from "./directory-input";
 import 'element-theme-default';
+import {Steps} from "element-react";
 
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-          <DirectoryInput/>
-      </header>
+        <DirectoryInput/>
     </div>
   );
 }

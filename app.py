@@ -4,6 +4,7 @@ from logging import Formatter, FileHandler
 from flask_cors import CORS
 
 from client import NotionClient
+from block import BlockSchema
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -16,6 +17,20 @@ def hello_world():
     client.get_page("https://www.notion.so/VP-Communications-e502b27c0cda4f14b5c1947e84aaa5f2")
     # https://www.notion.so/VP-Communications-e502b27c0cda4f14b5c1947e84aaa5f2#2ea60a28f0494607a6a1cc66450abc0f
     return 'Hello, World!'
+
+@app.route('/getDirectory', methods=['POST'])
+def get_directory():
+    if request.method == 'POST':
+        token_V2 = request.get_json()['token_V2']
+        workspace = request.get_json()['workspace']
+
+        client = NotionClient(token_V2)
+        directory = client.get_page(workspace)
+        blockSchema = BlockSchema()
+        result = blockSchema.dump(directory)
+        return result
+
+
 
 if not app.debug:
     file_handler = FileHandler('error.log')

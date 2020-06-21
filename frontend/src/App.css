@@ -37,3 +37,12 @@
     transform: translateY(0px)
   }
 }
+
+.form {
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.form input {
+  width: 350px;
+}

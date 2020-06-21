@@ -1,3 +1,10 @@
+from marshmallow import Schema, fields
+
+class BlockSchema(Schema):
+    title = fields.String()
+    icon = fields.String()
+    block_id = fields.String()
+    children = fields.List(fields.Nested(lambda: BlockSchema()))
 
 class Block(object):
     def __init__(self, title: str = "", icon: str = "", block_id: str = ""):

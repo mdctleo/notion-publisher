@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from parsing import Block
+from block import Block
 
 BASE_URL = "https://www.notion.so/"
 API_BASE_URL = BASE_URL + "api/v3/"
@@ -107,9 +107,9 @@ class NotionClient:
         if response.status_code == 200:
             dummy_root = self.get_directory(response.json())
             # dummy_root.print_tree(dummy_root)
-            dummy_root.print_tree(dummy_root, "")
+            # dummy_root.print_tree(dummy_root, "")
 
-            return
+            return dummy_root
         else:
             response.raise_for_status()
             raise BaseException("Failed to get initial page data")
