@@ -119,13 +119,14 @@ class NotionClient:
 
         for block_id, block_json in response['recordMap']['block'].items():
             block = self.get_sub_directory(block_id, block_json)
-            dummy_root.add_child(block)
+            if block is not None:
+                dummy_root.add_child(block)
 
         return dummy_root
 
     def get_sub_directory(self, block_id, block_json):
         if block_json['value']['type'] != 'page':
-            return
+            return None
 
         parentBlock = Block()
         parentBlock.set_block_id(block_id)
@@ -139,7 +140,8 @@ class NotionClient:
         if 'content' in block_json['value']:
             for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap']['block'].items():
                 childBlock = self.get_sub_directory(block_id, block_json)
-                parentBlock.add_child(childBlock)
+                if childBlock is not None:
+                    parentBlock.add_child(childBlock)
 
         return parentBlock
 
