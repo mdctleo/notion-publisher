@@ -1,69 +1,61 @@
 import React from "react";
 import { connect } from "react-redux"
-import {fetchDirectory} from "./action";
+import {fetchDirectory, setTokenV2, setWorkspace} from "./action";
+import {Button, Form, Input} from "element-react";
+import {
+    selectDirectoryData,
+    selectForm, selectRules,
+    selectTokenV2,
+    selectTokenV2Rule,
+    selectWorkspace,
+    selectWorkspaceRule
+} from "./selector";
 
 
-class DependencyControls extends React.Component {
+class DirectoryInput extends React.Component {
     constructor(props) {
         super(props)
     }
 
     componentDidMount() {
-        let ctx = this.canvas.getContext("2d")
-        let grd = ctx.createLinearGradient(0, 0, 200, 0)
 
-        for (let i = 0; i < d3.schemeRdYlGn[10].length; i++) {
-            grd.addColorStop((i / 10).toFixed(1), d3.schemeRdYlGn[10][i])
-        }
-
-        ctx.fillStyle = grd
-        ctx.fillRect(10, 10, 150, 80)
     }
 
     render() {
-        const isError = this.props.isError
         return (
-            <div>
-                <div className="dependency-control">
-                    <Search
-                        placeholder="input search text"
-                        onSearch={(value, event) => {
-                            this.props.fetchDependencies(value, "latest")
-                        }}
-                        style={{width: 200, marginRight: 20}}
-                    />
-                    <div className="dependency-legend">
-                        <canvas ref={canvas => this.canvas = canvas} width="170" height="30"/>
-                        <span className="low">Low Score</span>
-                        <span className="high">High Score</span>
-                    </div>
-                </div>
-                {isError && <Alert
-                    className="alert"
-                    message="Error"
-                    description="Something went wrong, try refreshing the page and retry"
-                    type="error"
-                    showIcon
-                    closable
-                    onClose={(e) => {this.props.setError(false, "")}}
-                />}
-            </div>
+            <Form ref="form" model={this.props.form} rules={this.props.rules} labelWidth="100" className="demo-ruleForm">
+                <Form.Item label="Your notion token" prop="pass">
+                    <Input value={this.props.tokenV2} onChange={event => this.props.setTokenV2(event)} autoComplete="off" />
+                </Form.Item>
+                <Form.Item label="A link to your notion workspace" prop="checkPass">
+                    <Input value={this.props.workspace} onChange={(value) => this.props.setWorkspace(value)} autoComplete="off" />
+                </Form.Item>
+                <Form.Item>
+                    <Button type="primary">Submit</Button>
+                </Form.Item>
+            </Form>
         )
     }
 }
 
 const mapStateToProps = state => {
     return {
-        data: selectDependencyData(state),
-        isError: selectDependencyError(state)
+        data: selectDirectoryData(state),
+        tokenV2: selectTokenV2(state),
+        workspace: selectWorkspace(state),
+        tokenV2Rule: selectTokenV2Rule(state),
+        workspaceRule: selectWorkspaceRule(state),
+        form: selectForm(state),
+        rules: selectRules(state)
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchDependencies: (packageName, version) => dispatch(fetchDependencies(packageName, version)),
-        setError: (isError, message) => dispatch(setDependencyError(isError, message))
+        fetchDirectory: () => dispatch(fetchDirectory()),
+        setTokenV2: (tokenV2) => dispatch(setTokenV2(tokenV2)),
+        setWorkspace: (workspace) => dispatch(setWorkspace(workspace))
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DependencyControls)
+export default connect(mapStateToProps, mapDispatchToProps)(DirectoryInput)
