@@ -115,7 +115,7 @@ class NotionClient:
             raise BaseException("Failed to get initial page data")
 
     def get_directory(self, response):
-        dummy_root = Block("dummy", "dummy", "dummy")
+        dummy_root = Block()
 
         for block_id, block_json in response['recordMap']['block'].items():
             block = self.get_sub_directory(block_id, block_json)
@@ -136,6 +136,8 @@ class NotionClient:
 
         if 'format' in block_json['value'] and 'page_icon' in block_json['value']['format']:
             parentBlock.set_icon(block_json['value']['format']['page_icon'])
+
+        parentBlock.set_title_icon(parentBlock.get_icon() + " " + parentBlock.get_title())
 
         if 'content' in block_json['value']:
             for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap']['block'].items():

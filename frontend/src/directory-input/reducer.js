@@ -1,7 +1,7 @@
 import {GET_DIRECTORY, RECEIVE_DIRECTORY, SET_TOKENV2, SET_WORKSPACE} from "./action";
 
 export const initialState = {
-    data: {},
+    data: [],
     directoryLoading: false,
     directoryError: false,
     form: {
@@ -26,11 +26,23 @@ const directory = (state = initialState, action) => {
         case GET_DIRECTORY:
             return {
                 ...state,
+                form: {
+                    ...state.form
+                },
+                rules: {
+                    ...state.rules
+                }
             }
         case RECEIVE_DIRECTORY:
             return {
                 ...state,
-                data: action.data
+                data: action.data.children,
+                form: {
+                    ...state.form
+                },
+                rules: {
+                    ...state.rules
+                }
             }
         case SET_TOKENV2:
             return {

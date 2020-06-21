@@ -4,13 +4,15 @@ class BlockSchema(Schema):
     title = fields.String()
     icon = fields.String()
     block_id = fields.String()
+    title_icon = fields.String()
     children = fields.List(fields.Nested(lambda: BlockSchema()))
 
 class Block(object):
-    def __init__(self, title: str = "", icon: str = "", block_id: str = ""):
-        self.title = title
-        self.icon = icon
-        self.block_id = block_id
+    def __init__(self):
+        self.title = ""
+        self.icon = ""
+        self.block_id = ""
+        self.title_icon = ""
         self.children = []
 
     def add_child(self, block) -> None:
@@ -19,11 +21,20 @@ class Block(object):
     def set_title(self, title: str) -> None:
         self.title = title
 
+    def set_title_icon(self, title_icon: str) -> None:
+        self.title_icon = title_icon
+
     def set_icon(self, icon: str) -> None:
         self.icon = icon
 
     def set_block_id(self, block_id: str) -> None:
         self.block_id = block_id
+
+    def get_title(self):
+        return self.title
+
+    def get_icon(self):
+        return self.icon
 
 
     def print_tree(self, node, indent):
