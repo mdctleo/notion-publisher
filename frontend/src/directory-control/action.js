@@ -1,27 +1,19 @@
 import request from "superagent";
 
 export const SET_INDEX_PAGE = 'SET_INDEX_PAGE'
-export const CLEAR_INDEX_PAGE = 'CLEAR_INDEX_PAGE'
 export const SET_SELECTION = 'SET_SELECTION'
-
-export const setIndexPage = (blockId) => {
-    return {
-        type: SET_INDEX_PAGE,
-        index: blockId
-    }
-}
-
-export const clearIndexPage = (blockId) => {
-    return {
-        type: CLEAR_INDEX_PAGE,
-        index: blockId
-    }
-}
+export const NEXT_STEP = 'NEXT_STEP'
 
 export const setSelection = (selection) => {
     return {
         type: SET_SELECTION,
         selection
+    }
+}
+export const setIndexPage = (blockId) => {
+    return {
+        type: SET_INDEX_PAGE,
+        index: blockId
     }
 }
 

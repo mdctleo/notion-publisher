@@ -1,16 +1,16 @@
-import { configureStore } from '@reduxjs/toolkit';
+import {configureStore} from '@reduxjs/toolkit';
 import directoryReducer from '../directory-input/reducer'
-import websiteReducer from '../directory-display/reducer'
+import directoryControlReducer from '../directory-control/reducer'
 import {createLogger} from "redux-logger";
 import thunkMiddleware from 'redux-thunk'
+
 const loggerMiddleware = createLogger()
 
 
-
 export default configureStore({
-  reducer: {
-    directory: directoryReducer,
-    website: websiteReducer
-  },
+    reducer: {
+        directory: directoryReducer,
+        directoryControl: directoryReducer,
+    },
     middleware: [loggerMiddleware, thunkMiddleware]
 });
