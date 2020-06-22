@@ -27,6 +27,9 @@ const DirectoryTree = ({data, index, setIndexPage}) => {
         <Tree
             className="tree"
             checkable
+            checkStrictly
+            showIcon
+            title="title_icon"
             treeData={data}
             options={{
                 label: 'title_icon',

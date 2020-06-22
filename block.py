@@ -3,8 +3,8 @@ from marshmallow import Schema, fields
 class BlockSchema(Schema):
     title = fields.String()
     icon = fields.String()
-    block_id = fields.String()
-    title_icon = fields.String()
+    block_id = fields.String(data_key="key")
+    # title_icon = fields.String()
     children = fields.List(fields.Nested(lambda: BlockSchema()))
 
 class Block(object):
