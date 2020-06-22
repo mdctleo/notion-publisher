@@ -22,10 +22,10 @@ def hello_world():
 def get_directory():
     if request.method == 'POST':
         token_V2 = request.get_json()['token_V2']
-        workspace = request.get_json()['workspace']
+        # workspace = request.get_json()['workspace']
 
         client = NotionClient(token_V2)
-        directory = client.get_page(workspace)
+        directory = client.get_page()
         blockSchema = BlockSchema()
         result = blockSchema.dump(directory)
         return result

@@ -35,14 +35,14 @@ export const setWorkspace = (workspace) => {
     }
 }
 
-export const fetchDirectory = (tokenV2, workspace) => {
+export const fetchDirectory = (tokenV2) => {
     return dispatch => {
         // dispatch(setDependencyLoading(true))
         dispatch(getDirectory(tokenV2))
         let url = `http://127.0.0.1:5000/getDirectory`
         return request.post(url)
             .set('Content-Type', 'application/json')
-            .send({'token_V2': tokenV2, 'workspace': workspace})
+            .send({'token_V2': tokenV2})
             .then(response => {
                 // dispatch(setDependencyLoading(false))
                 console.log(response.body)

@@ -92,17 +92,17 @@ class NotionClient:
         except ValueError:
             raise InvalidNotionIdentifier(input_value)
 
-    def get_page(self, url):
-        test = self.extract_id(url)
-        data = {
-            "pageId": test,
-            "limit": 100000,
-            "cursor": {"stack": []},
-            "chunkNumber": 0,
-            "verticalColumns": False,
-        }
+    def get_page(self):
+        # test = self.extract_id(url)
+        # data = {
+        #     "pageId": test,
+        #     "limit": 100000,
+        #     "cursor": {"stack": []},
+        #     "chunkNumber": 0,
+        #     "verticalColumns": False,
+        # }
         url = urljoin(API_BASE_URL, "loadUserContent")
-        response = self.session.post(url, json=data)
+        response = self.session.post(url)
 
         if response.status_code == 200:
             dummy_root = self.get_directory(response.json())
