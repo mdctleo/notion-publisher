@@ -22,7 +22,7 @@ const DirectoryTree = ({data, setSelection}) => {
                     setSelection(checked)
                 }}
             />
-            < Button type="primary">Next</Button>
+            {/*< Button type="primary">Next</Button>*/}
         </div>
     )
 }
