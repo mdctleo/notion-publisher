@@ -1,5 +1,5 @@
 import {createSelector} from "reselect";
-import {initialState} from "../directory-input/reducer";
+import {initialState} from "./reducer";
 
 const selectDirectoryControl = state => state.directoryControl || initialState
 

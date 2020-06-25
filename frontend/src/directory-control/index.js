@@ -3,6 +3,8 @@ import { connect } from "react-redux"
 import {Button} from "antd";
 import {selectStep} from "./selector";
 import DirectoryTree from "../directory-display";
+import DirectorySelect from "../directory-select";
+import {setNextStep} from "./action";
 
 class DirectoryControl extends React.Component {
     constructor(props) {
@@ -19,10 +21,11 @@ class DirectoryControl extends React.Component {
                 {this.props.step === 0?
                     <DirectoryTree/>
                    :
-                   <Select></Select>
+                   <DirectorySelect/>
                 }
 
-                {this.props.step === 0 ? <Button type="primary">Next</Button>
+                {this.props.step === 0 ?
+                    <Button type="primary" onClick={() => this.props.setNextStep(1)}>Next</Button>
                     :
                 <Button type="primary">Make Website!</Button>
                 }
@@ -39,6 +42,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        setNextStep: (step) => dispatch(setNextStep(step))
     }
 }
 

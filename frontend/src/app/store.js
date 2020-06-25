@@ -10,7 +10,7 @@ const loggerMiddleware = createLogger()
 export default configureStore({
     reducer: {
         directory: directoryReducer,
-        directoryControl: directoryReducer,
+        directoryControl: directoryControlReducer,
     },
     middleware: [loggerMiddleware, thunkMiddleware]
 });

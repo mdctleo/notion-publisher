@@ -2,12 +2,19 @@ import request from "superagent";
 
 export const SET_INDEX_PAGE = 'SET_INDEX_PAGE'
 export const SET_SELECTION = 'SET_SELECTION'
-export const NEXT_STEP = 'NEXT_STEP'
+export const SET_NEXT_STEP = 'NEXT_STEP'
 
 export const setSelection = (selection) => {
     return {
         type: SET_SELECTION,
         selection
+    }
+}
+
+export const setNextStep = (step) => {
+    return {
+        type: SET_NEXT_STEP,
+        step
     }
 }
 export const setIndexPage = (blockId) => {
