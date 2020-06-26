@@ -18,9 +18,11 @@ const DirectorySelect = ({data, setSelection}) => {
                     option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
             >
-                <Option value="jack">Jack</Option>
-                <Option value="lucy">Lucy</Option>
-                <Option value="tom">Tom</Option>
+                {
+                    this.props.selection.map((node) => {
+                        return <Option value={node.id}>{node.title}</Option>
+                    })
+                }
             </Select>
         </div>
     )
@@ -28,7 +30,7 @@ const DirectorySelect = ({data, setSelection}) => {
 
 const mapStateToProps = state => {
     return {
-        data: selectSelection(state),
+        selection: selectSelection(state),
     }
 }
 

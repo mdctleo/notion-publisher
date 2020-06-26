@@ -18,8 +18,8 @@ const DirectoryTree = ({data, setSelection}) => {
                     label: 'title_icon',
                     children: 'children'
                 }}
-                onCheck={({checked, halfChecked}) => {
-                    setSelection(checked)
+                onCheck={(checked, e) => {
+                    setSelection(e.checkedNodes)
                 }}
             />
             {/*< Button type="primary">Next</Button>*/}

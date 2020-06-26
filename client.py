@@ -122,10 +122,20 @@ class NotionClient:
             if block is not None:
                 dummy_root.add_child(block)
 
+        for block_id, block_json in response['recordMap']['collection'].items():
+            block = self.get_sub_directory(block_id, block_json)
+            if block is not None:
+                dummy_root.add_child(block)
+
         return dummy_root
 
     def get_sub_directory(self, block_id, block_json):
-        if block_json['value']['type'] != 'page':
+        # a block needs to have a value field
+        # if it has a type field, the type needs to be a page
+        # if it is under collection, it needs a schema
+        # otherwise, we return none, since it must be a "base" block, not part of the directory on the nav
+        # TODO: is this to verbose? does it cover enough cases?
+        if 'value' not in block_json or (('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in block_json['value']):
             return None
 
         parentBlock = Block()
@@ -133,9 +143,13 @@ class NotionClient:
 
         if 'properties' in block_json['value'] and 'title' in block_json['value']['properties']:
             parentBlock.set_title(block_json['value']['properties']['title'][0][0])
+        elif 'schema' in block_json['value'] and 'name' in block_json['value']:
+            parentBlock.set_title(block_json['value']['name'][0][0])
 
         if 'format' in block_json['value'] and 'page_icon' in block_json['value']['format']:
             parentBlock.set_icon(block_json['value']['format']['page_icon'])
+        elif 'schema' in block_json['value'] and 'icon' in block_json['value']:
+            parentBlock.set_icon(block_json['value']['icon'])
 
         parentBlock.set_title_icon(parentBlock.get_icon() + " " + parentBlock.get_title())
 
