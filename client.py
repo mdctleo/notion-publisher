@@ -9,6 +9,7 @@ from requests.cookies import cookiejar_from_dict
 from urllib.parse import urljoin
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from collections import deque
 
 from block import Block
 
@@ -105,9 +106,10 @@ class NotionClient:
         response = self.session.post(url)
 
         if response.status_code == 200:
-            dummy_root = self.get_directory(response.json())
+            # dummy_root = self.get_directory(response.json())
             # dummy_root.print_tree(dummy_root)
             # dummy_root.print_tree(dummy_root, "")
+            dummy_root = self.get_directory2(response.json())
 
             return dummy_root
         else:
@@ -128,6 +130,47 @@ class NotionClient:
                 dummy_root.add_child(block)
 
         return dummy_root
+
+    def get_directory2(self, response):
+        dummy_root = Block()
+        queue = deque()
+        duplicate = set()
+
+        for block_id, block_json in response['recordMap']['block'].items():
+            queue.append((block_id, block_json, dummy_root))
+
+        for block_id, block_json in response['recordMap']['collection'].items():
+            queue.append((block_id, block_json, dummy_root))
+
+        while len(queue) > 0:
+            block_id, block_json, parent = queue.popleft()
+
+            if 'value' not in block_json or block_id in duplicate or (('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in block_json['value']):
+                continue
+
+            block = Block()
+            block.set_block_id(block_id)
+            duplicate.add(block_id)
+
+            if 'properties' in block_json['value'] and 'title' in block_json['value']['properties']:
+                block.set_title(block_json['value']['properties']['title'][0][0])
+            elif 'schema' in block_json['value'] and 'name' in block_json['value']:
+                block.set_title(block_json['value']['name'][0][0])
+
+            if 'format' in block_json['value'] and 'page_icon' in block_json['value']['format']:
+                block.set_icon(block_json['value']['format']['page_icon'])
+            elif 'schema' in block_json['value'] and 'icon' in block_json['value']:
+                block.set_icon(block_json['value']['icon'])
+
+            parent.add_child(block)
+
+            if 'content' in block_json['value']:
+                for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap']['block'].items():
+                    queue.append((block_id, block_json, block))
+
+        return dummy_root
+
+
 
     def get_sub_directory(self, block_id, block_json):
         # a block needs to have a value field
@@ -151,7 +194,7 @@ class NotionClient:
         elif 'schema' in block_json['value'] and 'icon' in block_json['value']:
             parentBlock.set_icon(block_json['value']['icon'])
 
-        parentBlock.set_title_icon(parentBlock.get_icon() + " " + parentBlock.get_title())
+        # parentBlock.set_title_icon(parentBlock.get_icon() + " " + parentBlock.get_title())
 
         if 'content' in block_json['value']:
             for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap']['block'].items():

@@ -6,7 +6,7 @@ import {selectSelection} from "../directory-control/selector";
 const { Option } = Select;
 
 
-const DirectorySelect = ({data, setSelection}) => {
+const DirectorySelect = ({selection}) => {
     return (
         <div>
             <Select
@@ -19,8 +19,8 @@ const DirectorySelect = ({data, setSelection}) => {
                 }
             >
                 {
-                    this.props.selection.map((node) => {
-                        return <Option value={node.id}>{node.title}</Option>
+                    selection.map((node) => {
+                        return <Option value={node.id}>{node.icon} {node.title}</Option>
                     })
                 }
             </Select>
