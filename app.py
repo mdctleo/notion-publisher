@@ -30,6 +30,16 @@ def get_directory():
         result = blockSchema.dump(directory)
         return result
 
+@app.route('/makeWebsite', methods=['POST'])
+def make_website():
+    if request.method == 'POST':
+        print(request.get_json())
+        index = request.get_json()['index']
+        selection = request.get_json()['selection']
+
+        print(index)
+        print(selection)
+
 
 
 if not app.debug:

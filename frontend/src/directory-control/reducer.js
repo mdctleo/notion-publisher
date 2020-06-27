@@ -1,4 +1,4 @@
-import {SET_NEXT_STEP, SET_INDEX_PAGE, SET_SELECTION} from "./action";
+import {SET_NEXT_STEP, SET_INDEX, SET_SELECTION} from "./action";
 
 export const initialState = {
     selection: [],
@@ -19,7 +19,7 @@ const directoryControl = (state = initialState, action) => {
                 ...state,
                 step: action.step
             }
-        case SET_INDEX_PAGE:
+        case SET_INDEX:
             return {
                 ...state,
                 index: action.index

@@ -1,6 +1,6 @@
 import request from "superagent";
 
-export const SET_INDEX_PAGE = 'SET_INDEX_PAGE'
+export const SET_INDEX = 'SET_INDEX'
 export const SET_SELECTION = 'SET_SELECTION'
 export const SET_NEXT_STEP = 'NEXT_STEP'
 
@@ -17,30 +17,25 @@ export const setNextStep = (step) => {
         step
     }
 }
-export const setIndexPage = (blockId) => {
+export const setIndex = (blockId) => {
     return {
-        type: SET_INDEX_PAGE,
+        type: SET_INDEX,
         index: blockId
     }
 }
 
 
-export const makeWebsite = (index, blockIds) => {
+export const makeWebsite = (index, selection) => {
     return dispatch => {
-        // dispatch(setDependencyLoading(true))
-        // dispatch(getDirectory(tokenV2))
         let url = `http://127.0.0.1:5000/makeWebsite`
         return request.post(url)
             .set('Content-Type', 'application/json')
-            .send({'index': index, 'selection': blockIds})
+            .send({'index': index, 'selection': selection})
             .then(response => {
-                // dispatch(setDependencyLoading(false))
                 console.log(response.body)
             })
             .catch(err => {
                 console.log(err)
-                // dispatch(setDependencyLoading(false))
-                // dispatch(setDependencyError(true, err.message))
             })
     }
 }

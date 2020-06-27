@@ -14,3 +14,8 @@ export const selectStep = createSelector(
     directoryControl => directoryControl.step
 )
 
+export const selectIndex = createSelector(
+    selectDirectoryControl,
+    directoryControl => directoryControl.index
+)
+
