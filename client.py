@@ -16,6 +16,7 @@ from block import Block
 BASE_URL = "https://www.notion.so/"
 API_BASE_URL = BASE_URL + "api/v3/"
 
+
 def create_session():
     """
     retry on 502
@@ -75,9 +76,9 @@ class NotionClient:
         if url_or_id.startswith(BASE_URL):
             url_or_id = (
                 url_or_id
-                .split("#")[0]
-                .split("/")[-1]
-                .split("-")[-1]
+                    .split("#")[0]
+                    .split("/")[-1]
+                    .split("-")[-1]
             )
         try:
             # return url_or_id
@@ -137,7 +138,9 @@ class NotionClient:
         while len(queue) > 0:
             block_id, block_json, parent = queue.popleft()
 
-            if 'value' not in block_json or block_id in duplicate or (('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in block_json['value']):
+            if 'value' not in block_json or block_id in duplicate or (
+                    ('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in
+                    block_json['value']):
                 continue
 
             block = Block()
@@ -157,12 +160,11 @@ class NotionClient:
             parent.add_child(block)
 
             if 'content' in block_json['value']:
-                for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap']['block'].items():
+                for block_id, block_json in self.get_block(block_json['value']['content'])['recordMap'][
+                    'block'].items():
                     queue.append((block_id, block_json, block))
 
         return dummy_root
-
-
 
     def get_sub_directory(self, block_id, block_json):
         # a block needs to have a value field
@@ -170,7 +172,9 @@ class NotionClient:
         # if it is under collection, it needs a schema
         # otherwise, we return none, since it must be a "base" block, not part of the directory on the nav
         # TODO: is this to verbose? does it cover enough cases?
-        if 'value' not in block_json or (('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in block_json['value']):
+        if 'value' not in block_json or (
+                ('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in
+                block_json['value']):
             return None
 
         parentBlock = Block()
@@ -216,17 +220,15 @@ class NotionClient:
             response.raise_for_status()
             raise BaseException("Failed to get block")
 
-
-
-
     def enque_tasks(self, selection):
         taskIds = []
         url = urljoin(API_BASE_URL, "enqueueTask")
-        for blockId in selection:
-            data = {
+
+        for block in selection:
+            data = {"task": {
                 "eventName": "exportBlock",
                 "request": {
-                    "blockId": blockId,
+                    "blockId": block,
                     "exportOptions": {
                         "exportType": "html",
                         "locale": "en",
@@ -235,10 +237,7 @@ class NotionClient:
                     "recursive": False
                 }
 
-            }
+            }}
             response = self.session.post(url, json=data)
-            print(response.status_code)
+            print(response.json())
             taskIds.append(response.json()['taskId'])
-
-
-

@@ -28,10 +28,11 @@ export const setIndex = (blockId) => {
 export const makeWebsite = (index, selection) => {
     return dispatch => {
         let url = `http://127.0.0.1:5000/makeWebsite`
+        const formattedSelection = selection.map(block => block.key)
         return request.post(url)
             .set('Content-Type', 'application/json')
             .withCredentials()
-            .send({'index': index, 'selection': selection})
+            .send({'index': index, 'selection': formattedSelection})
             .then(response => {
                 console.log(response.body)
             })
