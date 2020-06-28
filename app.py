@@ -1,13 +1,16 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 import logging
 from logging import Formatter, FileHandler
 from flask_cors import CORS
 
 from client import NotionClient
 from block import BlockSchema
+from website import WebsiteMaker
 
 app = Flask(__name__)
 app.config.from_object('config')
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+# redis_client = redis.Redis(host='localhost')
 # TODO: remove cors
 CORS(app, origins="http://localhost:3000", supports_credentials=True)
 
@@ -22,23 +25,27 @@ def hello_world():
 def get_directory():
     if request.method == 'POST':
         token_V2 = request.get_json()['token_V2']
-        # workspace = request.get_json()['workspace']
 
         client = NotionClient(token_V2)
+        session['token_v2'] = token_V2
+
         directory = client.get_page()
         blockSchema = BlockSchema()
+
         result = blockSchema.dump(directory)
         return result
 
 @app.route('/makeWebsite', methods=['POST'])
 def make_website():
     if request.method == 'POST':
-        print(request.get_json())
         index = request.get_json()['index']
         selection = request.get_json()['selection']
 
-        print(index)
-        print(selection)
+        # TODO: maybe use redis to persist the client???
+        website_maker = WebsiteMaker(session['token_v2'], index, selection)
+        website_maker.make_website()
+
+        return "make website!"
 
 
 

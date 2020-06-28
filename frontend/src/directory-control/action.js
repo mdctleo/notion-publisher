@@ -30,6 +30,7 @@ export const makeWebsite = (index, selection) => {
         let url = `http://127.0.0.1:5000/makeWebsite`
         return request.post(url)
             .set('Content-Type', 'application/json')
+            .withCredentials()
             .send({'index': index, 'selection': selection})
             .then(response => {
                 console.log(response.body)

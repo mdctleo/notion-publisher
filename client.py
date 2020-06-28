@@ -1,7 +1,7 @@
 """
 Adapted from notion-py by @jamalex
 """
-
+import json
 import uuid
 import requests
 from requests import Session, HTTPError
@@ -39,11 +39,6 @@ class InvalidNotionIdentifier(Exception):
 
 
 class NotionClient:
-    """
-    This is the entry point to using the API. Create an instance of this class, passing it the value of the
-    "token_v2" cookie from a logged-in browser session on Notion.so. Most of the methods on here are primarily
-    for internal use -- the main one you'll likely want to use is `get_block`.
-    """
 
     def __init__(self, token_v2):
         # self.session = create_session()
@@ -66,11 +61,8 @@ class NotionClient:
         adapter = HTTPAdapter(max_retries=retry)
         session.mount("https://", adapter)
         session.cookies = cookiejar_from_dict({"token_v2": self.token_v2})
+
         return session
-
-
-    def get_token(self):
-        return self.token_v2
 
     def extract_id(self, url_or_id):
         """
@@ -223,5 +215,30 @@ class NotionClient:
         else:
             response.raise_for_status()
             raise BaseException("Failed to get block")
+
+
+
+
+    def enque_tasks(self, selection):
+        taskIds = []
+        url = urljoin(API_BASE_URL, "enqueueTask")
+        for blockId in selection:
+            data = {
+                "eventName": "exportBlock",
+                "request": {
+                    "blockId": blockId,
+                    "exportOptions": {
+                        "exportType": "html",
+                        "locale": "en",
+                        "timeZone": "America/Los_Angeles"
+                    },
+                    "recursive": False
+                }
+
+            }
+            response = self.session.post(url, json=data)
+            print(response.status_code)
+            taskIds.append(response.json()['taskId'])
+
 
 

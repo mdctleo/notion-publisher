@@ -42,6 +42,7 @@ export const fetchDirectory = (tokenV2) => {
         let url = `http://127.0.0.1:5000/getDirectory`
         return request.post(url)
             .set('Content-Type', 'application/json')
+            .withCredentials()
             .send({'token_V2': tokenV2})
             .then(response => {
                 // dispatch(setDependencyLoading(false))
