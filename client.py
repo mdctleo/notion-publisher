@@ -10,6 +10,7 @@ from urllib.parse import urljoin
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from collections import deque
+import asyncio
 
 from block import Block
 
@@ -220,7 +221,9 @@ class NotionClient:
             response.raise_for_status()
             raise BaseException("Failed to get block")
 
-    def enque_tasks(self, selection):
+
+    # TODO: look into using asyncio with flask??
+    def enqueue_tasks(self, selection):
         taskIds = []
         url = urljoin(API_BASE_URL, "enqueueTask")
 
@@ -252,9 +255,11 @@ class NotionClient:
         response = self.session.post(url, json=data)
         return response.json()['results']
 
+    # TODO: look into using asyncio with flask
     def download_files(self, result):
+        file_streams = []
         for task in result:
             response = self.session.get(task['status']['exportURL'])
-            f = open("websites/" + task['request']['blockId'] + ".zip", "wb")
-            print(response.content)
-            f.write(response.content)
+            file_streams.append(response.content)
+
+        return file_streams
