@@ -244,7 +244,7 @@ class NotionClient:
 
             response = self.session.post(url, json=data)
             taskIds.append(response.json()['taskId'])
-            return taskIds
+        return taskIds
 
     def get_tasks(self, taskIds):
         url = urljoin(API_BASE_URL, "getTasks")
