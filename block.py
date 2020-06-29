@@ -36,6 +36,8 @@ class Block(object):
     def get_icon(self):
         return self.icon
 
+    def get_block_id(self):
+        return self.block_id
 
     def print_tree(self, node, indent):
         if node is None:

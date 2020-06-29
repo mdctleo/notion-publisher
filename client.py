@@ -138,6 +138,10 @@ class NotionClient:
 
         while len(queue) > 0:
             block_id, block_json, parent = queue.popleft()
+            # a block needs to have a value field
+            # if it has a type field, the type needs to be a page
+            # if it is under collection, it needs a schema
+            # otherwise, we return none, since it must be a "base" block and not part of the directory on the nav
 
             if 'value' not in block_json or block_id in duplicate or (
                     ('type' in block_json['value'] and block_json['value']['type'] != 'page') and 'schema' not in
@@ -145,8 +149,12 @@ class NotionClient:
                 continue
 
             block = Block()
-            block.set_block_id(block_id)
-            duplicate.add(block_id)
+            if 'schema' in block_json['value']:
+                block.set_block_id(block_json['value']['parent_id'])
+            else:
+                block.set_block_id(block_id)
+
+            duplicate.add(block.get_block_id())
 
             if 'properties' in block_json['value'] and 'title' in block_json['value']['properties']:
                 block.set_title(block_json['value']['properties']['title'][0][0])
