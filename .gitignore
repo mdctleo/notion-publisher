@@ -1,3 +1,4 @@
+.DS_Store
 .idea/
 notion-publisher.iml
 __pycache__/
@@ -10,3 +11,4 @@ frontend/README.md
 test2.json
 personal_test.json
 frontend/yarn-error.log
+websites/*

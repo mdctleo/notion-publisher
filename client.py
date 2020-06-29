@@ -238,6 +238,23 @@ class NotionClient:
                 }
 
             }}
+
             response = self.session.post(url, json=data)
-            print(response.json())
             taskIds.append(response.json()['taskId'])
+            return taskIds
+
+    def get_tasks(self, taskIds):
+        url = urljoin(API_BASE_URL, "getTasks")
+        data = {
+            "taskIds": taskIds
+        }
+
+        response = self.session.post(url, json=data)
+        return response.json()['results']
+
+    def download_files(self, result):
+        for task in result:
+            response = self.session.get(task['status']['exportURL'])
+            f = open("websites/" + task['request']['blockId'] + ".zip", "wb")
+            print(response.content)
+            f.write(response.content)
