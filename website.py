@@ -23,10 +23,9 @@ class WebsiteMaker:
         self.save_downloaded_files(file_streams)
 
 
-
+    # TODO: look into more how notion does downloading, a continous check does not seem like the best option
     def is_download_complete(self, taskIds, wait_time):
         results = self.client.get_tasks(taskIds)
-        print(results)
         finished_all_tasks = True
         for task in results:
             if task['state'] != 'success':
