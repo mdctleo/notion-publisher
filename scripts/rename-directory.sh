@@ -12,8 +12,8 @@ echo "$parent_path"
 cd "$parent_path"
 cd "../websites"
 
-if mv "$old_dir_name" "$new_dir_name" ; then
-    echo 0
+if mv "in-progress/$old_dir_name" "done/$new_dir_name" ; then
+    exit 0
 else
-    echo 1
+    exit 1
 fi

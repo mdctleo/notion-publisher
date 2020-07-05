@@ -7,9 +7,9 @@ dir_name=$1
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 cd "$parent_path"
-cd "../websites"
+cd "../websites/in-progress"
 if mkdir "$dir_name" ; then
-    echo 0
+    exit 0
 else
-    echo 1
+    exit 1
 fi
