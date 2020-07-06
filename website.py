@@ -5,6 +5,10 @@ import io
 import threading
 import subprocess
 import os
+from os.path import join
+from os import listdir, rmdir, scandir
+from shutil import move
+from bs4 import BeautifulSoup
 
 lock = threading.RLock()
 
@@ -28,19 +32,25 @@ class WebsiteMaker:
         self.is_download_complete(taskIds, wait_time)
         file_streams = self.client.download_files(self.results)
         self.save_downloaded_files(file_streams, temp_dir_name)
+        # self.prepare_deployment(temp_dir_name)
 
     '''
     acquire lock, make a folder with a temp unique name by executing a bash script, release lock
     @:return str folder_name
     '''
     def make_website_folder(self):
-        lock.acquire()
-        next_available_dir_name = self.find_available_dir_name()
-        status = subprocess.run(["./scripts/make-directory.sh", next_available_dir_name], capture_output=True)
-        if status.returncode == 1:
+        try:
+            lock.acquire()
+            next_available_dir_name = self.find_available_dir_name()
+            os.mkdir("./websites/in-progress/" + next_available_dir_name)
+        # status = subprocess.run(["./scripts/make-directory.sh", next_available_dir_name], capture_output=True)
+        # if status.returncode == 1:
+        #     lock.release()
+        #     raise Exception()
+        except FileExistsError as e:
+            raise e
+        finally:
             lock.release()
-            raise Exception()
-        lock.release()
 
         return next_available_dir_name
 
@@ -67,6 +77,7 @@ class WebsiteMaker:
             self.scheduler.enter(wait_time, 1, self.is_download_complete, (taskIds, wait_time))
             self.scheduler.run(blocking=True)
 
+    # TODO: see if it is better to do link replacing in memory
     def save_downloaded_files(self, file_streams, temp_dir_name):
         for i in range(len(file_streams)):
             file_stream = zipfile.ZipFile(io.BytesIO(file_streams[i]))
@@ -76,7 +87,76 @@ class WebsiteMaker:
     '''
     read html files and change necessary href tags
     '''
-    def prepare_deployment(self):
+    # every https://www.notion.so starting href should be replaced with a local relative link
+    # or an empty link if a local file does not exist
+    # replace - with %20?
+    def prepare_deployment(self, temp_dir_name):
+        self.bring_to_root(temp_dir_name)
+        index_original_name = self.rename_index_page(temp_dir_name)
+
+
+        return None
+
+    def rename_index_page(self, temp_dir_name):
+        """ Rename index page to index.html, returns original name
+
+        :returns original_name: original index page's name
+        :rtype original_name: str
+        """
+        for file in os.scandir(join("./websites/in-progress", temp_dir_name)):
+            if not file.is_dir():
+                id = self.get_page_id(file.name)
+                if id == self.index:
+                    original_name = file.name
+                    os.rename(join("./websites/in-progress", temp_dir_name, file.name), join("./websites/in-progress", temp_dir_name, "index.html"))
+
+                    return original_name
+
+    def get_page_id(self, page_name):
+        """ Extract the id portion from the html page file name
+
+        :param page_name: html page file name
+        :type page_name: str
+        :return: the id portion of the html page file
+        :rtype: str
+        """
+
+        split_file_name = page_name.split(" ")
+        return split_file_name[len(split_file_name) - 1].split(".")[0]
+
+    def bring_to_root(self, temp_dir_name):
+        """ Bring the separate pages from their individual directory to the same level
+        as the temp directory
+
+        :param temp_dir_name: The temp directory's name
+        :type temp_dir_name: str
+        """
+        root = join("websites/in-progress", temp_dir_name)
+        website_dir = scandir(root)
+
+        for page_dir in website_dir:
+            for item in listdir(join(root, page_dir.name)):
+                move(join(root, page_dir.name, item), root)
+            rmdir(join(root, page_dir.name))
+
+    def rename_links(self, temp_dir_name, index_original_name):
+        # every https://www.notion.so starting href should be replaced with a local relative link
+        # or an empty link if a local file does not exist
+        # replace - with %20?
+        """ Rename absolute links to relative links in every page using beautiful soup
+
+        :param temp_dir_name: The temp directory's name
+        :type temp_dir_name: str
+        :param index_original_name: index page's original name
+        :type index_original_name: str
+        """
+
+        for file in os.scandir(join("websites/in-progress", temp_dir_name)):
+            if not file.is_dir():
+                with open(file) as fp:
+                    soup = BeautifulSoup(fp)
+                    print(soup.find_all("a"))
+
         return None
 
 
@@ -88,3 +168,44 @@ class WebsiteMaker:
     def deploy_website(self, folder):
         return None
 
+def rename_links(temp_dir_name, index_original_name):
+    # every https://www.notion.so starting href should be replaced with a local relative link
+    # or an empty link if a local file does not exist
+    # replace - with %20?
+    """ Rename absolute links to relative links in every page using beautiful soup
+
+    :param temp_dir_name: The temp directory's name
+    :type temp_dir_name: str
+    :param index_original_name: index page's original name
+    :type index_original_name: str
+    """
+
+    for file in os.scandir(join("websites/in-progress", temp_dir_name)):
+        if not file.is_dir():
+            with open(file) as fp:
+                soup = BeautifulSoup(fp, "html.parser")
+                for link in soup.find_all("a"):
+                    href = link.get('href')
+                    if is_link_notion(href):
+                        get_link_id(href)
+
+
+
+
+def is_link_notion(link):
+    """ test if the given link starts with https://www.notion.so
+
+    :param link: href of an anchor tag
+    :return: if the link is a notion link
+    :rtype: bool
+    """
+    return link.split("/")[2] == "www.notion.so" if len(link.split("/")) > 2 else False
+
+def get_link_id(link):
+    """ extract the id portion of a notion link
+
+    :param link: a notion link
+    :return: id of the link
+    """
+    return link.split("/")[-1].split("-")[-1]
+rename_links("1", "")
