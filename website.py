@@ -23,6 +23,9 @@ class WebsiteMaker:
         self.results = []
 
     def make_website(self):
+        """
+        Entry method to - download files, prepare files for deployment and finally deploy the files
+        """
         taskIds = self.client.enqueue_tasks(self.selection)
         wait_time = 2.0
         for i in range(len(taskIds)):
@@ -35,12 +38,10 @@ class WebsiteMaker:
         self.save_downloaded_files(file_streams, temp_dir_name)
         self.prepare_deployment(temp_dir_name)
 
-    '''
-    acquire lock, make a folder with a temp unique name by executing a bash script, release lock
-    @:return str folder_name
-    '''
-
     def make_website_folder(self):
+        """
+        Makes a temp folder for downloaded html file and deployment preparations
+        """
         try:
             lock.acquire()
             next_available_dir_name = self.find_available_dir_name()
@@ -52,16 +53,24 @@ class WebsiteMaker:
 
         return next_available_dir_name
 
-    '''
-    find available temp directory name, all directory in in-progress is incremented numbers
-    '''
-
     def find_available_dir_name(self):
+        """ Find available temp directory name, all directory in in-progress is incremented numbers
+
+        :return: an available temp directory name
+        :rtype: str
+        """
         website_dirs = os.scandir("./websites/in-progress")
         return str(int(max([website_dir.name for website_dir in website_dirs if website_dir.name != '.DS_Store'], default=-1, key=int)) + 1)
 
     # TODO: look into more how notion does downloading, a continous check does not seem like the best option
     def is_download_complete(self, taskIds, wait_time):
+        """ Check at set interval to see if files are ready for export from notion
+
+        :param taskIds: A list of taskIds returned by notion when downloads are enqueued
+        :type taskIds: str
+        :param wait_time: wait interval
+        :type wait_time: float
+        """
         results = self.client.get_tasks(taskIds)
         finished_all_tasks = True
         for task in results:
@@ -77,51 +86,43 @@ class WebsiteMaker:
 
     # TODO: see if it is better to do link replacing in memory
     def save_downloaded_files(self, file_streams, temp_dir_name):
+        """ Unzip and save downloaded files from notion in temp folder
+
+        :param file_streams: A list of file streams returned by notion export
+        :type file_streams: Bytes
+        :param temp_dir_name: The Temp's directory name we are saving the streams to
+        :type temp_dir_name: str
+        """
         for i in range(len(file_streams)):
             file_stream = zipfile.ZipFile(io.BytesIO(file_streams[i]))
             blockId = self.results[i]['request']['blockId']
             file_stream.extractall("websites/in-progress/" + temp_dir_name + "/" + blockId)
 
-    '''
-    read html files and change necessary href tags
-    '''
 
     # every https://www.notion.so starting href should be replaced with a local relative link
     # or an empty link if a local file does not exist
     # replace - with %20?
     def prepare_deployment(self, temp_dir_name):
         self.bring_to_root(temp_dir_name)
-        index_original_name = self.rename_index_page(temp_dir_name)
-        self.rename_links(temp_dir_name, index_original_name)
+        file_name_map = self.create_filename_map(temp_dir_name)
+        self.rename_index_page(temp_dir_name, file_name_map)
+        self.rename_links(temp_dir_name, file_name_map)
 
+    def create_filename_map(self, temp_dir_name):
+        """ Create a mapping between block_id and actual filenames
 
-    def rename_index_page(self, temp_dir_name):
-        """ Rename index page to index.html, returns original name
-
-        :returns original_name: original index page's name
-        :rtype original_name: str
+        :param temp_dir_name: The temp directory's name
+        :type temp_dir_name: str
+        :return file_name_map: A dictionary that contains block_id and actual filename
+        :rtype file_name_map: dict
         """
+        file_name_map = {}
         for file in os.scandir(join("./websites/in-progress", temp_dir_name)):
-            if not file.is_dir():
-                id = self.get_page_id(file.name)
-                if id == self.index.replace("-", ""):
-                    original_name = file.name
-                    os.rename(join("./websites/in-progress", temp_dir_name, file.name),
-                              join("./websites/in-progress", temp_dir_name, "index.html"))
+            block_id = file.name.split(" ")[-1].split(".")[0]
+            file_name_map[block_id] = file.name
 
-                    return original_name
+        return file_name_map
 
-    def get_page_id(self, page_name):
-        """ Extract the id portion from the html page file name
-
-        :param page_name: html page file name
-        :type page_name: str
-        :return: the id portion of the html page file
-        :rtype: str
-        """
-
-        split_file_name = page_name.split(" ")
-        return split_file_name[len(split_file_name) - 1].split(".")[0]
 
     def bring_to_root(self, temp_dir_name):
         """ Bring the separate pages from their individual directory to the same level
@@ -138,35 +139,47 @@ class WebsiteMaker:
                 move(join(root, page_dir.name, item), root)
             rmdir(join(root, page_dir.name))
 
+    def rename_index_page(self, temp_dir_name, file_name_map):
+        """ Rename index page to index.html, returns original name
 
-    def rename_links(self, temp_dir_name, index_original_name):
-        # every https://www.notion.so starting href should be replaced with a local relative link
-        # or an empty link if a local file does not exist
-        # replace - with %20?
+        :param temp_dir_name: The temp directory's name
+        :type temp_dir_name: str
+        :param file_name_map: A dictionary that contains block_id and actual filename
+        :type file_name_map: dict
+        """
+        index_block_id = self.index.replace("-", "")
+        if index_block_id in file_name_map:
+            os.rename(join("./websites/in-progress", temp_dir_name, file_name_map[index_block_id]),
+                      join("./websites/in-progress", temp_dir_name, "index.html"))
+            file_name_map[index_block_id] = "index.html"
+
+    def rename_links(self, temp_dir_name, file_name_map):
         """ Rename absolute links to relative links in every page using beautiful soup
 
         :param temp_dir_name: The temp directory's name
         :type temp_dir_name: str
-        :param index_original_name: index page's original name
-        :type index_original_name: str
+        :param file_name_map: A dictionary that contains block_id and actual filename
+        :type file_name_map: dict
         """
 
         for file in os.scandir(join("websites/in-progress", temp_dir_name)):
             if not file.is_dir():
                 with open(file, "r+") as fp:
                     soup = BeautifulSoup(fp, "html.parser")
-                    for link in soup.find_all("a"):
+                    for link in soup.body.find_all("a"):
                         href = link.get('href')
                         if self.is_link_notion(href):
-                            link_file_name = "index.html" if self.get_file_name(href) == index_original_name else self.get_file_name(href) + ".html"
-                            link['href'] = link_file_name
+                            href_block_id = self.extract_block_id(href)
+                            link['href'] = file_name_map[href_block_id] if href_block_id in file_name_map else ""
+
+
                     fp.seek(0)
                     fp.write(str(soup))
                     fp.truncate()
                     fp.close()
 
 
-    def is_link_notion(slef, link):
+    def is_link_notion(self, link):
         """ test if the given link starts with https://www.notion.so
 
         :param link: href of an anchor tag
@@ -175,29 +188,15 @@ class WebsiteMaker:
         """
         return link.split("/")[2] == "www.notion.so" if len(link.split("/")) > 2 else False
 
+    def extract_block_id(self, link):
+        """ Extract the block id portion of a notion link
 
-    def get_file_name(self, link):
-        """ Get the file name from a notion link
-
-        :param link: a notion link
-        :return: file name format of a notion link
+        :param link:
+        :type link: str
+        :return: The block id portion of a notion link
+        :rtype: str
         """
-        return link.split("/")[-1].replace("-", "%20")
-
-
-    def find_matching_file(self, link_file_name):
-        """ Find the matching local file for a link
-
-        :param link_file_name: extracted file name part of a link
-        :return:
-        """
-        return None
-
-    '''
-    deploy the website in the given folder using surge
-    @:param str folder
-    @:return void
-    '''
+        return link.split("/")[-1].split("-")[-1]
 
     def deploy_website(self, folder):
         return None
