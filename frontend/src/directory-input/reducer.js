@@ -1,42 +1,36 @@
-import {GET_DIRECTORY, RECEIVE_DIRECTORY, SET_TOKENV2, SET_WORKSPACE} from "./action";
+import {
+    GET_DIRECTORY,
+    RECEIVE_DIRECTORY,
+    SET_DIRECTORY_ERROR,
+    SET_DIRECTORY_LOADING,
+    SET_TOKENV2,
+    SET_WORKSPACE
+} from "./action";
 
 export const initialState = {
     data: [],
     directoryLoading: false,
-    directoryError: false,
+    directoryError: {status: false, message: ""},
     form: {
         tokenV2: "",
-        workspace: ""
     },
     rules: {
         tokenV2: [
             {required: true, message: 'Please input your token', trigger: 'blur'},
         ],
-        workspace: [
-            {required: true, message: "Please input a link to your workplace", trigger: 'blur'}
-        ]
-
     }
 }
 
 
-
 const directory = (state = initialState, action) => {
     switch (action.type) {
-        case GET_DIRECTORY:
-            return {
-                ...state,
-                form: {
-                    ...state.form
-                },
-                rules: {
-                    ...state.rules
-                }
-            }
         case RECEIVE_DIRECTORY:
             return {
                 ...state,
                 data: action.data.children,
+                directoryError: {
+                    ...state.directoryError
+                },
                 form: {
                     ...state.form
                 },
@@ -47,6 +41,9 @@ const directory = (state = initialState, action) => {
         case SET_TOKENV2:
             return {
                 ...state,
+                directoryError: {
+                    ...state.directoryError
+                },
                 form: {
                     ...state.form,
                     tokenV2: action.tokenV2
@@ -55,16 +52,35 @@ const directory = (state = initialState, action) => {
                     ...state.rules
                 }
             }
-        case SET_WORKSPACE:
+        case SET_DIRECTORY_LOADING:
             return {
                 ...state,
+                directoryLoading: action.loading,
+                directoryError: {
+                    ...state.directoryError
+                },
                 form: {
                     ...state.form,
-                    workspace: action.workspace
                 },
                 rules: {
                     ...state.rules
                 }
+            }
+        case SET_DIRECTORY_ERROR:
+            return {
+                ...state,
+                directoryError: {
+                    status: action.status,
+                    message: action.message
+                },
+                form: {
+                    ...state.form
+                },
+                rules: {
+                    ...state.rules
+                }
+
+
             }
         default:
             return state

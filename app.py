@@ -3,9 +3,11 @@ import logging
 from logging import Formatter, FileHandler
 from flask_cors import CORS
 
-from client import NotionClient
-from block import BlockSchema
-from website import WebsiteMaker
+from Client import NotionClient
+from Block import BlockSchema
+from Website import WebsiteSchema
+from exceptions import DeploymentException
+from WebsiteMaker import WebsiteMaker
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -13,13 +15,6 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # redis_client = redis.Redis(host='localhost')
 # TODO: remove cors
 CORS(app, origins="http://localhost:3000", supports_credentials=True)
-
-@app.route('/')
-def hello_world():
-    client = NotionClient("f445e3235235fa03a783ead8101612360e05230d561dda4af5c074627731306cfd8fc3c8678d681a37844863535e567fb80a849476367eb7663c9f2c79a4be9bce0c52dd96188498408b757e4d4a")
-    client.get_page("https://www.notion.so/VP-Communications-e502b27c0cda4f14b5c1947e84aaa5f2")
-    # https://www.notion.so/VP-Communications-e502b27c0cda4f14b5c1947e84aaa5f2#2ea60a28f0494607a6a1cc66450abc0f
-    return 'Hello, World!'
 
 @app.route('/getDirectory', methods=['POST'])
 def get_directory():
@@ -38,14 +33,22 @@ def get_directory():
 @app.route('/makeWebsite', methods=['POST'])
 def make_website():
     if request.method == 'POST':
-        index = request.get_json()['index']
-        selection = request.get_json()['selection']
+        try:
+            index = request.get_json()['index']
+            selection = request.get_json()['selection']
+            if index is None or "":
+                return 400
 
-        # TODO: maybe use redis to persist the client???
-        website_maker = WebsiteMaker(session['token_v2'], index, selection)
-        url = website_maker.make_website()
+            if selection is None or []:
+                return 400
 
-        return "make website!"
+            # TODO: maybe use redis to persist the client???
+            website_maker = WebsiteMaker(session['token_v2'], index, selection)
+            website_schema = WebsiteSchema()
+            return website_schema.dump(website_maker.make_website())
+        except DeploymentException as e:
+            return 500
+
 
 
 

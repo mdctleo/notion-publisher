@@ -1,8 +1,8 @@
 import React from "react";
-import { connect } from "react-redux"
-import {fetchDirectory, setTokenV2, setWorkspace} from "./action";
+import {connect} from "react-redux"
+import {fetchDirectory, setDirectoryError, setTokenV2, setWorkspace} from "./action";
 // import {Button, Form, Input} from "element-react";
-import { Form, Input, Button } from 'antd';
+import {Form, Input, Button, Alert} from 'antd';
 
 import {
     selectDirectoryData,
@@ -24,18 +24,19 @@ class DirectoryInput extends React.Component {
     }
 
     render() {
+        const error = this.props.error
         return (
-            <Form layout="vertical" className="form" onFinish={({ tokenV2 }) => this.props.fetchDirectory(tokenV2)}>
-                <Form.Item label="Your token:" name="tokenV2" rules={[{ required: true, message: 'Please input your token!' }]}>
-                    <Input />
-                </Form.Item>
-                {/*<Form.Item label="A link to your workspace" prop="workspace">*/}
-                    {/*<Input value={this.props.workspace} onChange={(value) => this.props.setWorkspace(value)} autoComplete="off" />*/}
-                {/*</Form.Item>*/}
-                <Form.Item>
-                    <Button type="primary" htmlType="submit">Submit</Button>
-                </Form.Item>
-            </Form>
+            <div>
+                <Form layout="vertical" className="form" onFinish={({tokenV2}) => this.props.fetchDirectory(tokenV2)}>
+                    <Form.Item label="Your token:" name="tokenV2"
+                               rules={[{required: true, message: 'Please input your token!'}]}>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">Submit</Button>
+                    </Form.Item>
+                </Form>
+            </div>
         )
     }
 }
@@ -48,7 +49,7 @@ const mapStateToProps = state => {
         tokenV2Rule: selectTokenV2Rule(state),
         workspaceRule: selectWorkspaceRule(state),
         form: selectForm(state),
-        rules: selectRules(state)
+        rules: selectRules(state),
     }
 }
 
@@ -56,7 +57,8 @@ const mapDispatchToProps = dispatch => {
     return {
         fetchDirectory: (tokenV2) => dispatch(fetchDirectory(tokenV2)),
         setTokenV2: (tokenV2) => dispatch(setTokenV2(tokenV2)),
-        setWorkspace: (workspace) => dispatch(setWorkspace(workspace))
+        setWorkspace: (workspace) => dispatch(setWorkspace(workspace)),
+        setError: (status, message) => dispatch(setDirectoryError(status, message))
     }
 }
 

@@ -1,11 +1,10 @@
 import sys
 
-from client import NotionClient
+from Client import NotionClient
 import sched, time
 import zipfile
 import io
 import threading
-from subprocess import Popen, PIPE
 import os
 from os.path import join
 from os import listdir, rmdir, scandir
@@ -13,11 +12,11 @@ from shutil import move
 from bs4 import BeautifulSoup
 import pexpect
 
+from Website import Website
 from exceptions import DeploymentException
-
 lock = threading.RLock()
 
-
+# TODO: see if reafactoring some responsibility out of this class is possible
 class WebsiteMaker:
     """ Makes user's website based on selection and index
      Create an instance of this class and call make_website as an entry point
@@ -48,8 +47,8 @@ class WebsiteMaker:
     def make_website(self):
         """ Entry method to - download files, prepare files for deployment and finally deploy the files
 
-        :returns: surge url of deployed site
-        :rtype: str
+        :returns: json representation of a website object with the deployed url
+        :rtype: return
         """
         taskIds = self.client.enqueue_tasks(self.selection)
         wait_time = 2.0
@@ -62,7 +61,7 @@ class WebsiteMaker:
         file_streams = self.client.download_files(self.results)
         self.__save_downloaded_files(file_streams, temp_dir_name)
         self.__prepare_deployment(temp_dir_name)
-        return self.__deploy_website(temp_dir_name)
+        return Website(self.__deploy_website(temp_dir_name))
 
     def __make_website_folder(self):
         """

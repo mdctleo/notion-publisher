@@ -19,3 +19,17 @@ export const selectIndex = createSelector(
     directoryControl => directoryControl.index
 )
 
+export const selectUrl = createSelector(
+    selectDirectoryControl,
+    directoryControl => directoryControl.url
+)
+
+export const selectMakeWebsiteLoading = createSelector(
+    selectDirectoryControl,
+    directoryControl => directoryControl.makeWebsiteLoading
+)
+
+export const selectMakeWebsiteError = createSelector(
+    selectDirectoryControl,
+    directoryControl => directoryControl.makeWebsiteError
+)

@@ -38,4 +38,19 @@ const selectRules = createSelector(
     directory => directory.rules
 )
 
-export {selectDirectoryData, selectTokenV2, selectWorkspace, selectTokenV2Rule, selectWorkspaceRule, selectForm, selectRules}
+const selectDirectoryError = createSelector(
+    selectDirectory,
+    directory => directory.directoryError
+)
+
+const selectDirectoryLoading = createSelector(
+    selectDirectory,
+    directory => directory.directoryLoading
+)
+
+export {
+    selectDirectoryData, selectTokenV2,
+    selectWorkspace, selectTokenV2Rule,
+    selectWorkspaceRule, selectForm, selectRules,
+    selectDirectoryError, selectDirectoryLoading
+}

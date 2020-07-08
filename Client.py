@@ -12,7 +12,7 @@ from requests.packages.urllib3.util.retry import Retry
 from collections import deque
 import asyncio
 
-from block import Block
+from Block import Block
 
 BASE_URL = "https://www.notion.so/"
 API_BASE_URL = BASE_URL + "api/v3/"

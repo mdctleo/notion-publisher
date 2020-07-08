@@ -1,4 +1,4 @@
-import { Select } from "antd";
+import {Select, Spin} from "antd";
 import connect from "react-redux/es/connect/connect";
 import React from "react";
 import {selectSelection} from "../directory-control/selector";
@@ -28,7 +28,7 @@ const DirectorySelect = ({selection, setIndexPage}) => {
 
 const mapStateToProps = state => {
     return {
-        selection: selectSelection(state),
+        selection: selectSelection(state)
     }
 }
 

@@ -1,7 +1,7 @@
 import {connect} from "react-redux";
 import {selectDirectoryData} from "../directory-input/selector";
 import React from "react";
-import {Button, Tree} from 'antd';
+import {Button, Spin, Tree} from 'antd';
 import {setSelection} from "../directory-control/action";
 
 const DirectoryTree = ({data, setSelection}) => {
@@ -22,7 +22,6 @@ const DirectoryTree = ({data, setSelection}) => {
                     setSelection(e.checkedNodes)
                 }}
             />
-            {/*< Button type="primary">Next</Button>*/}
         </div>
     )
 }

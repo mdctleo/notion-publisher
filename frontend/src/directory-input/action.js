@@ -4,6 +4,8 @@ export const GET_DIRECTORY = 'GET_DIRECTORY'
 export const RECEIVE_DIRECTORY = 'RECEIVE_DIRECTORY'
 export const SET_TOKENV2 = 'SET_TOKENV2'
 export const SET_WORKSPACE = 'SET_WORKSPACE'
+export const SET_DIRECTORY_LOADING = 'SET_DIRECTORY_LOADING'
+export const SET_DIRECTORY_ERROR = 'SET_DIRECTORY_ERROR'
 
 
 export const getDirectory = (tokenV2) => {
@@ -35,24 +37,37 @@ export const setWorkspace = (workspace) => {
     }
 }
 
+export const setDirectoryLoading = (loading) => {
+    return {
+        type: SET_DIRECTORY_LOADING,
+        loading
+    }
+}
+
+export const setDirectoryError = (status, message) => {
+    return {
+        type: SET_DIRECTORY_ERROR,
+        status,
+        message
+    }
+}
+
 export const fetchDirectory = (tokenV2) => {
     return dispatch => {
-        // dispatch(setDependencyLoading(true))
-        dispatch(getDirectory(tokenV2))
+        dispatch(setDirectoryLoading(true))
         let url = `http://127.0.0.1:5000/getDirectory`
         return request.post(url)
             .set('Content-Type', 'application/json')
             .withCredentials()
             .send({'token_V2': tokenV2})
             .then(response => {
-                // dispatch(setDependencyLoading(false))
-                console.log(response.body)
                 dispatch(receiveDirectory(response.body))
             })
             .catch(err => {
-                console.log(err)
-                // dispatch(setDependencyLoading(false))
-                // dispatch(setDependencyError(true, err.message))
+                dispatch(setDirectoryError(true, err.message))
+            })
+            .finally(() => {
+                dispatch(setDirectoryLoading(false))
             })
     }
 }
