@@ -12,3 +12,8 @@ class NotionAPIException(Exception):
     def __init__(self, msg):
         super().__init__(msg)
         self.msg = msg
+
+class DownloadTimeoutException(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+        self.msg = msg

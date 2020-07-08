@@ -6,7 +6,7 @@ from flask_cors import CORS
 from Client import NotionClient
 from Block import BlockSchema
 from Website import WebsiteSchema
-from exceptions import DeploymentException
+from exceptions import DeploymentException, NotionAPIException, DownloadTimeoutException
 from WebsiteMaker import WebsiteMaker
 
 app = Flask(__name__)
@@ -28,16 +28,22 @@ def get_directory():
     :rtype: Block
     """
     if request.method == 'POST':
-        token_V2 = request.get_json()['token_V2']
+        try:
+            token_V2 = request.get_json()['token_V2']
 
-        client = NotionClient(token_V2)
-        session['token_v2'] = token_V2
+            client = NotionClient(token_V2)
+            session['token_v2'] = token_V2
 
-        directory = client.get_page()
-        blockSchema = BlockSchema()
+            directory = client.get_page()
+            blockSchema = BlockSchema()
 
-        result = blockSchema.dump(directory)
-        return result
+            result = blockSchema.dump(directory)
+            return result
+        except NotionAPIException:
+            return 500
+        except DownloadTimeoutException:
+            return 500
+
 
 @app.route('/makeWebsite', methods=['POST'])
 def make_website():

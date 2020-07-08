@@ -11,10 +11,10 @@ from os import listdir, rmdir, scandir, rename
 from shutil import move
 from bs4 import BeautifulSoup
 import pexpect
-import re
 
 from Website import Website
-from exceptions import DeploymentException
+from exceptions import DeploymentException, DownloadTimeoutException
+
 lock = threading.RLock()
 
 # TODO: see if reafactoring some responsibility out of this class is possible
@@ -58,7 +58,7 @@ class WebsiteMaker:
                 wait_time += 0.5
 
         temp_dir_name = self.__make_website_folder()
-        self.__is_download_complete(taskIds, wait_time)
+        self.__is_download_complete(taskIds, wait_time, 0)
         file_streams = self.client.download_files(self.results)
         self.__save_downloaded_files(file_streams, temp_dir_name)
         self.__prepare_deployment(temp_dir_name)
@@ -91,7 +91,7 @@ class WebsiteMaker:
         return str(int(max([website_dir.name for website_dir in website_dirs if website_dir.name != '.DS_Store'], default=-1, key=int)) + 1)
 
     # TODO: look into more how notion does downloading, a continous check does not seem like the best option
-    def __is_download_complete(self, taskIds, wait_time):
+    def __is_download_complete(self, taskIds, wait_time, count):
         """ Check at set interval to see if files are ready for export from notion
 
         :param taskIds: A list of taskIds returned by notion when downloads are enqueued
@@ -108,8 +108,10 @@ class WebsiteMaker:
 
         if finished_all_tasks == True:
             self.results = results
+        elif count == 10:
+            raise DownloadTimeoutException("Donwload from notion timed out")
         else:
-            self.scheduler.enter(wait_time, 1, self.__is_download_complete, (taskIds, wait_time))
+            self.scheduler.enter(wait_time, 1, self.__is_download_complete, (taskIds, wait_time, count + 1))
             self.scheduler.run(blocking=True)
 
     # TODO: see if it is better to do link replacing in memory
