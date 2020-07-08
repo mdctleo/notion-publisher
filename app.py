@@ -18,6 +18,15 @@ CORS(app, origins="http://localhost:3000", supports_credentials=True)
 
 @app.route('/getDirectory', methods=['POST'])
 def get_directory():
+    """ Gets requesting party's directory structure on notion and store token_v2 as a cookie
+    honestly I should change the way this is done hmmm instead of cookie
+
+    :param token_v2: requesting party's notion token
+    :type token_v2: str
+
+    :return: A json representation of a Block object tree
+    :rtype: Block
+    """
     if request.method == 'POST':
         token_V2 = request.get_json()['token_V2']
 
@@ -32,6 +41,18 @@ def get_directory():
 
 @app.route('/makeWebsite', methods=['POST'])
 def make_website():
+    """ Makes website based on selected pages and index page
+
+    :param index: selected index page block id with - delimiter
+    :type index: str
+    :param selection: selected pages' block ids with - delimiter
+    :type selection: list
+    :param token_v2: requesting party's notion token
+    :type token_v2: str
+
+    :return: A json representation of Website object
+    :rtype: Website
+    """
     if request.method == 'POST':
         try:
             index = request.get_json()['index']

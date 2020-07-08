@@ -7,7 +7,7 @@ import io
 import threading
 import os
 from os.path import join
-from os import listdir, rmdir, scandir
+from os import listdir, rmdir, scandir, rename
 from shutil import move
 from bs4 import BeautifulSoup
 import pexpect
@@ -62,7 +62,9 @@ class WebsiteMaker:
         file_streams = self.client.download_files(self.results)
         self.__save_downloaded_files(file_streams, temp_dir_name)
         self.__prepare_deployment(temp_dir_name)
-        return Website(self.__deploy_website(temp_dir_name))
+        url = self.__deploy_website(temp_dir_name)
+        self.__finish_deployment(temp_dir_name, url)
+        return Website(url)
 
     def __make_website_folder(self):
         """
@@ -217,7 +219,7 @@ class WebsiteMaker:
     def __extract_block_id(self, link):
         """ Extract the block id portion of a notion link
 
-        :param link:
+        :param link: A link that starts with https://www.notion.com/
         :type link: str
         :return: The block id portion of a notion link
         :rtype: str
@@ -247,4 +249,17 @@ class WebsiteMaker:
                 continue
 
         raise DeploymentException('Failed to deploy with surge')
+
+    def __finish_deployment(self, temp_dir_name, url):
+        """ Rename temp directory to url name, move temp directory from in-progress to done
+
+        :param temp_dir_name: The temp directory's name
+        :type temp_dir_name: str
+        :param url: url of the deployed website
+        :type url: str
+        """
+        try:
+            rename(join("websites/in-progress", temp_dir_name), join("websites/done", url))
+        except OSError:
+            raise DeploymentException("Failed to finish deployment")
 
