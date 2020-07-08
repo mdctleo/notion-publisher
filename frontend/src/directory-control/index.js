@@ -12,7 +12,7 @@ import {
 import DirectoryTree from "../directory-display";
 import DirectorySelect from "../directory-select";
 import {makeWebsite, setMakeWebsiteError, setNextStep} from "./action";
-import {selectDirectoryError, selectDirectoryLoading} from "../directory-input/selector";
+import {selectDirectoryData, selectDirectoryError, selectDirectoryLoading} from "../directory-input/selector";
 import {setDirectoryError} from "../directory-input/action";
 
 class DirectoryControl extends React.Component {
@@ -55,25 +55,12 @@ class DirectoryControl extends React.Component {
                     }}
                 />}
                 <Spin size="large" tip="this might take a while..." spinning={directoryLoading || makeWebsiteLoading}>
-                    {/*{this.props.step === 0 ?*/}
-                        {/*<DirectoryTree/>*/}
-                        {/*:*/}
-                        {/*<DirectorySelect/>*/}
-                    {/*}*/}
-
-                    {/*{this.props.step === 0 ?*/}
-                        {/*<Button className="directory-button" type="primary"*/}
-                                {/*onClick={() => this.props.setNextStep(1)}>Next</Button>*/}
-                        {/*:*/}
-                        {/*<Button className="directory-button" type="primary"*/}
-                                {/*onClick={() => this.props.makeWebsite(this.props.index, this.props.selection)}>Make*/}
-                            {/*Website!</Button>*/}
-                    {/*}*/}
                     {
                         this.props.step === 0 &&
                         <div>
                             <DirectoryTree/>
                             <Button className="directory-button" type="primary"
+                                    disabled={this.props.treeData.length === 0}
                                     onClick={() => this.props.setNextStep(1)}>Next</Button>
                         </div>
 
@@ -107,6 +94,7 @@ const mapStateToProps = state => {
         step: selectStep(state),
         index: selectIndex(state),
         selection: selectSelection(state),
+        treeData: selectDirectoryData(state),
         directoryLoading: selectDirectoryLoading(state),
         makeWebsiteLoading: selectMakeWebsiteLoading(state),
         directoryError: selectDirectoryError(state),

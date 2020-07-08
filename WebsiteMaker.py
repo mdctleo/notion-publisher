@@ -11,6 +11,7 @@ from os import listdir, rmdir, scandir
 from shutil import move
 from bs4 import BeautifulSoup
 import pexpect
+import re
 
 from Website import Website
 from exceptions import DeploymentException
@@ -230,16 +231,20 @@ class WebsiteMaker:
             :type temp_dir_name: str
             :return website_link: the deployed website's link
             :rtype website_link: str
+            :raise DeploymentException: throws an error if surge fails to deploy website after 20 tries
             """
         for i in range(20):
             try:
-                child = pexpect.spawnu("surge " + join("websites/in-progress", temp_dir_name), encoding='utf-8')
+                child = pexpect.spawnu("surge " + join("websites/in-progress", temp_dir_name), encoding='ASCII')
                 child.logfile = sys.stdout
+                child.expect("project:")
                 child.expect("[A-Za-z]+-[A-Za-z]+.surge.sh")
                 child.sendline("\n")
                 child.expect("Success!")
-                return child.readline().split(" ")[-1]
-            except pexpect.exceptions.EOF as e:
+                # getting rid off ansi control sequence that underlines link
+                return child.readline().split(" ")[-1].split('\x1b[4m')[-1].split('\x1b')[0]
+            except pexpect.exceptions.EOF:
                 continue
 
         raise DeploymentException('Failed to deploy with surge')
+
