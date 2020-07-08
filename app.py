@@ -43,7 +43,7 @@ def make_website():
 
         # TODO: maybe use redis to persist the client???
         website_maker = WebsiteMaker(session['token_v2'], index, selection)
-        website_maker.make_website()
+        url = website_maker.make_website()
 
         return "make website!"
 
