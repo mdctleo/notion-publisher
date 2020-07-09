@@ -1,14 +1,14 @@
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, request, session
 import logging
 from logging import Formatter, FileHandler
 from flask_cors import CORS
 
-from Client import NotionClient
-from Block import BlockSchema
-from Website import WebsiteSchema
-from exceptions import DeploymentException, NotionAPIException, DownloadTimeoutException, BaseExceptionSchema, \
+from backend.Client import NotionClient
+from backend.Block import BlockSchema
+from backend.Website import WebsiteSchema
+from backend.exceptions import DeploymentException, NotionAPIException, DownloadTimeoutException, BaseExceptionSchema, \
     InvalidRequestException
-from WebsiteMaker import WebsiteMaker
+from backend.WebsiteMaker import WebsiteMaker
 
 app = Flask(__name__)
 app.config.from_object('config')

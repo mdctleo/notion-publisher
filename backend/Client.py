@@ -1,19 +1,16 @@
 """
 Adapted from notion-py by @jamalex
 """
-import json
 import uuid
-import requests
-from requests import Session, HTTPError
+from requests import Session
 from requests.cookies import cookiejar_from_dict
 from urllib.parse import urljoin
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from collections import deque
-import asyncio
 
-from Block import Block
-from exceptions import InvalidNotionIdentifier, NotionAPIException
+from backend.Block import Block
+from backend.exceptions import InvalidNotionIdentifier, NotionAPIException
 
 BASE_URL = "https://www.notion.so/"
 API_BASE_URL = BASE_URL + "api/v3/"
