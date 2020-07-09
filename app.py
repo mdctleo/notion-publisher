@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, jsonify
 import logging
 from logging import Formatter, FileHandler
 from flask_cors import CORS
@@ -6,7 +6,8 @@ from flask_cors import CORS
 from Client import NotionClient
 from Block import BlockSchema
 from Website import WebsiteSchema
-from exceptions import DeploymentException, NotionAPIException, DownloadTimeoutException
+from exceptions import DeploymentException, NotionAPIException, DownloadTimeoutException, BaseExceptionSchema, \
+    InvalidRequestException
 from WebsiteMaker import WebsiteMaker
 
 app = Flask(__name__)
@@ -39,10 +40,10 @@ def get_directory():
 
             result = blockSchema.dump(directory)
             return result
-        except NotionAPIException:
-            return 500
-        except DownloadTimeoutException:
-            return 500
+        except NotionAPIException as e:
+            return BaseExceptionSchema().dump(e), 500
+        except DownloadTimeoutException as e:
+            return BaseExceptionSchema().dump(e), 500
 
 
 @app.route('/makeWebsite', methods=['POST'])
@@ -63,18 +64,18 @@ def make_website():
         try:
             index = request.get_json()['index']
             selection = request.get_json()['selection']
-            if index is None or "":
-                return 400
+            if index is None or len(index) == 0:
+                return BaseExceptionSchema().dump(InvalidRequestException('Missing Index')), 400
 
-            if selection is None or []:
-                return 400
+            if selection is None or len(selection) == 0:
+                return BaseExceptionSchema().dump(InvalidRequestException('Missing Selection')), 400
 
             # TODO: maybe use redis to persist the client???
             website_maker = WebsiteMaker(session['token_v2'], index, selection)
             website_schema = WebsiteSchema()
             return website_schema.dump(website_maker.make_website())
         except DeploymentException as e:
-            return 500
+            return BaseExceptionSchema().dump(e), 500
 
 
 

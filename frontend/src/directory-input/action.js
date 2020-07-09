@@ -64,7 +64,7 @@ export const fetchDirectory = (tokenV2) => {
                 dispatch(receiveDirectory(response.body))
             })
             .catch(err => {
-                dispatch(setDirectoryError(true, err.message))
+                dispatch(setDirectoryError(true, err.response.body.msg))
             })
             .finally(() => {
                 dispatch(setDirectoryLoading(false))

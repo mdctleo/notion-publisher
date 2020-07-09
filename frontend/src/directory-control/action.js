@@ -64,7 +64,7 @@ export const makeWebsite = (index, selection) => {
                 dispatch(setNextStep(2))
             })
             .catch(err => {
-                dispatch(setMakeWebsiteError(true, err.message))
+                dispatch(setMakeWebsiteError(true, err.response.body.msg))
             })
             .finally(() => {
                 dispatch(setMakeWebsiteLoading(false))
