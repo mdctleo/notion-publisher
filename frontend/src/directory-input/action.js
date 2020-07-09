@@ -1,4 +1,5 @@
 import request from 'superagent'
+import {BASE_API} from "../index";
 
 export const GET_DIRECTORY = 'GET_DIRECTORY'
 export const RECEIVE_DIRECTORY = 'RECEIVE_DIRECTORY'
@@ -55,7 +56,7 @@ export const setDirectoryError = (status, message) => {
 export const fetchDirectory = (tokenV2) => {
     return dispatch => {
         dispatch(setDirectoryLoading(true))
-        let url = `http://127.0.0.1:5000/getDirectory`
+        let url = `${BASE_API}/getDirectory`
         return request.post(url)
             .set('Content-Type', 'application/json')
             .withCredentials()
@@ -64,7 +65,7 @@ export const fetchDirectory = (tokenV2) => {
                 dispatch(receiveDirectory(response.body))
             })
             .catch(err => {
-                dispatch(setDirectoryError(true, err.response.body.msg))
+                dispatch(setDirectoryError(true, err.message))
             })
             .finally(() => {
                 dispatch(setDirectoryLoading(false))

@@ -12,7 +12,6 @@ from WebsiteMaker import WebsiteMaker
 
 app = Flask(__name__)
 app.config.from_object('config')
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # redis_client = redis.Redis(host='localhost')
 # TODO: remove cors
 CORS(app, origins="http://localhost:3000", supports_credentials=True)

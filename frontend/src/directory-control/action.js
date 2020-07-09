@@ -1,4 +1,5 @@
 import request from "superagent";
+import {BASE_API} from "../index";
 
 export const SET_INDEX = 'SET_INDEX'
 export const SET_SELECTION = 'SET_SELECTION'
@@ -53,7 +54,7 @@ export const setWebsiteURL = url => {
 export const makeWebsite = (index, selection) => {
     return dispatch => {
         dispatch(setMakeWebsiteLoading(true))
-        let url = `http://127.0.0.1:5000/makeWebsite`
+        let url = `${BASE_API}/makeWebsite`
         const formattedSelection = selection.map(block => block.key)
         return request.post(url)
             .set('Content-Type', 'application/json')
@@ -64,7 +65,7 @@ export const makeWebsite = (index, selection) => {
                 dispatch(setNextStep(2))
             })
             .catch(err => {
-                dispatch(setMakeWebsiteError(true, err.response.body.msg))
+                dispatch(setMakeWebsiteError(true, err.message))
             })
             .finally(() => {
                 dispatch(setMakeWebsiteLoading(false))
