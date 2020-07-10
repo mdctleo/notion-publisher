@@ -1,6 +1,6 @@
 import sys
 
-from backend.Client import NotionClient
+from Client import NotionClient
 import sched, time
 import zipfile
 import io
@@ -12,8 +12,8 @@ from shutil import move
 from bs4 import BeautifulSoup
 import pexpect
 
-from backend.Website import Website
-from backend.exceptions import DeploymentException, DownloadTimeoutException
+from Website import Website
+from exceptions import DeploymentException, DownloadTimeoutException
 
 lock = threading.RLock()
 

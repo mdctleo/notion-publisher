@@ -9,8 +9,8 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from collections import deque
 
-from backend.Block import Block
-from backend.exceptions import InvalidNotionIdentifier, NotionAPIException
+from Block import Block
+from exceptions import InvalidNotionIdentifier, NotionAPIException
 
 BASE_URL = "https://www.notion.so/"
 API_BASE_URL = BASE_URL + "api/v3/"
