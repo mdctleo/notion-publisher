@@ -240,7 +240,6 @@ class WebsiteMaker:
         for i in range(20):
             try:
                 child = pexpect.spawnu("surge " + join("websites/in-progress", temp_dir_name), encoding='ASCII')
-                child.logfile = sys.stdout
                 child.expect("project:")
                 child.expect("[A-Za-z]+-[A-Za-z]+.surge.sh")
                 child.sendline("\n")
