@@ -198,9 +198,10 @@ class NotionClient:
             response = self.session.post(url, json=data)
             if response.status_code == 200:
                 taskIds.append(response.json()['taskId'])
-                return taskIds
             else:
                 raise NotionAPIException("Failed to enqueTasks")
+
+        return taskIds
 
 
     def get_tasks(self, taskIds):
