@@ -133,8 +133,8 @@ class WebsiteMaker:
     # or an empty link if a local file does not exist
     # replace - with %20?
     def __prepare_deployment(self, temp_dir_name):
-        self.__bring_to_root(temp_dir_name)
         file_name_map = self.__create_filename_map(temp_dir_name)
+        self.__bring_to_root(temp_dir_name)
         self.__rename_index_page(temp_dir_name, file_name_map)
         self.__rename_links(temp_dir_name, file_name_map)
 
@@ -147,9 +147,12 @@ class WebsiteMaker:
         :rtype file_name_map: dict
         """
         file_name_map = {}
-        for file in os.scandir(join("./websites/in-progress", temp_dir_name)):
-            block_id = file.name.split(" ")[-1].split(".")[0]
-            file_name_map[block_id] = file.name
+        for dir in os.scandir(join("./websites/in-progress", temp_dir_name)):
+            for file in os.scandir(dir.path):
+                block_id = file.name.split(" ")[-1].split(".")[0]
+                file_name_map[block_id] = file.name
+                if block_id != dir.name.replace("-", ""):
+                    file_name_map[dir.name.replace("-", "")] = file.name
 
         return file_name_map
 
@@ -263,4 +266,3 @@ class WebsiteMaker:
             rename(join("websites/in-progress", temp_dir_name), join("websites/done", url))
         except OSError:
             raise DeploymentException("Failed to finish deployment")
-
